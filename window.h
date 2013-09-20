@@ -2,6 +2,7 @@
 #define WINDOW_H
 
 #include <QWindow>
+#include <QScopedPointer>
 
 class AbstractScene;
 class QOpenGLContext;

@@ -25,6 +25,7 @@ public:
       to update your animation.
       */
     virtual void update( float t ) = 0;
+    virtual void cleanup() {}
 
     /**
       Draw your scene.

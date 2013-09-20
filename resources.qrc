@@ -3,4 +3,7 @@
         <file>basic.vert</file>
         <file>basic.frag</file>
     </qresource>
+    <qresource prefix="/qml">
+        <file>main.qml</file>
+    </qresource>
 </RCC>

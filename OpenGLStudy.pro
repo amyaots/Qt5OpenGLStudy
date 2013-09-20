@@ -1,21 +1,24 @@
-QT += core gui opengl
+QT += core widgets opengl quick
 
 TEMPLATE = app
 
 HEADERS += \
     abstractscene.h \
     scene.h \
-    window.h
+    window.h \
+    quickwindow.h
 
 SOURCES += \
     scene.cpp \
     window.cpp \
     main.cpp \
-    abstractscene.cpp
+    abstractscene.cpp \
+    quickwindow.cpp
 
 OTHER_FILES += \
     basic.vert \
-    basic.frag
+    basic.frag \
+    main.qml
 
 RESOURCES += \
     resources.qrc

@@ -21,7 +21,7 @@ void Scene::initialise()
     m_funcs->initializeOpenGLFunctions();
     // get context opengl-version
     qDebug() << "Context valid: " << context()->isValid();
-    qDebug() << "Really used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
+    qDebug() << "Used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
     qDebug() << "OpenGL information: VENDOR:       " << (const char*)glGetString(GL_VENDOR);
     qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
     qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
@@ -31,6 +31,7 @@ void Scene::initialise()
     prepareShaderProgram();
     prepareVertexBuffers();
     prepareVertexArrayObject();
+    glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 }
 
 void Scene::update(float t)
@@ -43,9 +44,12 @@ void Scene::render()
     // Clear the buffer with the current clearing color
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    m_shaderProgram.bind();
+
     QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Draw stuff
     glDrawArrays( GL_TRIANGLES, 0, 6 );
+    m_shaderProgram.release();
 }
 
 void Scene::resize(int w, int h)
