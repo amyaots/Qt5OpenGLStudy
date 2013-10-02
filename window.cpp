@@ -6,7 +6,7 @@
 #include <QKeyEvent>
 #include <QOpenGLContext>
 
-Window::Window(QScreen *screen): QWindow(screen), m_scene(new Scene(this))
+Window::Window(QScreen *screen): QWindow(screen), m_scene(new Scene)
 {
     setSurfaceType(OpenGLSurface);
 
@@ -34,6 +34,8 @@ Window::Window(QScreen *screen): QWindow(screen), m_scene(new Scene(this))
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateScene()));
     timer->start(16);
+
+    m_time.start();
 }
 
 void Window::initializeGL()
@@ -57,7 +59,8 @@ void Window::reziseGL()
 
 void Window::updateScene()
 {
-    m_scene->update(0.0f);
+    float time = m_time.elapsed()/1000.0f;
+    m_scene->update(time);
     paintGL();
 }
 

@@ -20,6 +20,7 @@ public:
     virtual void update(float t);
     virtual void render();
     virtual void resize(int w, int h);
+    virtual void cleanup();
 
 private:
     void prepareShaderProgram();

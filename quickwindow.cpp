@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QCoreApplication>
 
+
 QuickWindow::QuickWindow(QWindow *parent):
     QQuickView(parent),
     m_scene(new Scene(this))
@@ -27,7 +28,7 @@ QuickWindow::QuickWindow(QWindow *parent):
     format.setDepthBufferSize(24);
     format.setVersion(4, 3);
     format.setSamples(4);
-    //QtQuick not draw on Core profile. Dunno why...
+    //QtQuick not draw on Core profile.
     format.setProfile(QSurfaceFormat::CompatibilityProfile);
     setFormat(format);
 
@@ -36,21 +37,25 @@ QuickWindow::QuickWindow(QWindow *parent):
 
 void QuickWindow::initialiseOpenGLScene()
 {
-    QOpenGLContext* context = openglContext();
-    m_scene->setContext( context );
+    m_scene->setContext( openglContext() );
     m_scene->initialise();
     m_scene->resize( width(), height() );
 }
 
 void QuickWindow::renderOpenGLScene()
 {
-
     m_scene->render();
 }
 
 void QuickWindow::cleanupOpenGLScene()
 {
     m_scene->cleanup();
+}
+
+void QuickWindow::resizeEvent( QResizeEvent* e )
+{
+    m_scene->resize( width(), height() );
+    QQuickView::resizeEvent( e );
 }
 
 void QuickWindow::update()
@@ -76,3 +81,6 @@ void QuickWindow::keyPressEvent(QKeyEvent *e)
             QuickWindow::keyPressEvent(e);
     }
 }
+
+
+

@@ -1,7 +1,7 @@
-#include "quickwindow.h"
-//#include "window.h"   basic window with OpenGL context 4.3 Core profile
+#include "quickwindow.h"              //QtQuick Window with OpenGL conext 4.3 Copability profile
+//#include "window.h"                 //basic window with OpenGL context 4.3 Core profile
 #include <QApplication>
-#include <QtQuick/QQuickView>
+
 
 int main(int argc, char* argv[])
 {
@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 
     QuickWindow* window = new QuickWindow();
     //window->setPosition(200, 100);
-    window->setMinimumSize( QSize( 800, 600 ) );
+    window->setMinimumSize( QSize( 512, 512 ) );
     window->setResizeMode( QQuickView::SizeRootObjectToView );
     window->setTitle("Qt5 OpenGL 4.3 Study");
     window->setSource(QUrl("qrc:///qml/main.qml"));

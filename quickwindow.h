@@ -10,7 +10,8 @@ class QuickWindow : public QQuickView
 {
     Q_OBJECT
 public:
-     explicit QuickWindow(QWindow* parent = 0);
+    explicit QuickWindow(QWindow* parent = 0);
+    AbstractScene* scene() const { return m_scene; }
 
 public slots:
     void initialiseOpenGLScene();
@@ -19,10 +20,11 @@ public slots:
     void update();
 
 protected:
-    void keyPressEvent(QKeyEvent *);
+    void resizeEvent( QResizeEvent* e );
+    void keyPressEvent(QKeyEvent *e);
 
 private:
-    AbstractScene*   m_scene;
+    AbstractScene*  m_scene;
     QTime           m_time;
 };
 

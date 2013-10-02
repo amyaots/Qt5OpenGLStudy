@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include <QWindow>
-#include <QScopedPointer>
+#include <QTime>
 
 class AbstractScene;
 class QOpenGLContext;
@@ -26,7 +26,8 @@ protected:
 
 private:
     QOpenGLContext* m_context;
-    AbstractScene* m_scene;
+    AbstractScene*  m_scene;
+    QTime          m_time;
 };
 
 #endif // WINDOW_H

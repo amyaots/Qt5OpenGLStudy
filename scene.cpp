@@ -31,7 +31,9 @@ void Scene::initialise()
     prepareShaderProgram();
     prepareVertexBuffers();
     prepareVertexArrayObject();
-    glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+    glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
+    //m_funcs->glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
+    //
 }
 
 void Scene::update(float t)
@@ -103,4 +105,9 @@ void Scene::prepareVertexArrayObject()
     m_vertexPositionBuffer.bind();
     m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 2);
     m_shaderProgram.enableAttributeArray("vertex");
+}
+
+void Scene::cleanup()
+{
+    delete m_funcs;
 }
