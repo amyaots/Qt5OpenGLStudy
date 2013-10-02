@@ -1,4 +1,4 @@
-QT += core opengl openglextensions widgets quick
+QT += core opengl widgets quick
 
 TEMPLATE = app
 
