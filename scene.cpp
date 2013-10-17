@@ -15,7 +15,7 @@ void Scene::initialise()
     m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_3_Core>();
     if (!m_funcs)
     {
-        qFatal("Requires OpenGL >= 4.3");
+        qFatal("Requires OpenGL >= 4.0");
         exit(1);
     }
     m_funcs->initializeOpenGLFunctions();
