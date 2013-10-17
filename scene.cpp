@@ -1,7 +1,7 @@
 #include "scene.h"
 
 #include <QOpenGLContext>
-#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFunctions_4_2_Core>
 
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
@@ -12,10 +12,10 @@ Scene::Scene(QObject* parent)
 
 void Scene::initialise()
 {
-    m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_3_Core>();
+    m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_2_Core>();
     if (!m_funcs)
     {
-        qFatal("Requires OpenGL >= 4.0");
+        qFatal("Requires OpenGL >= 4.2");
         exit(1);
     }
     m_funcs->initializeOpenGLFunctions();
