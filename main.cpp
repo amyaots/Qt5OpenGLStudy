@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     //window->setPosition(200, 100);
     window->setMinimumSize( QSize( 512, 512 ) );
     window->setResizeMode( QQuickView::SizeRootObjectToView );
-    window->setTitle("Qt5 OpenGL 4.3 Study");
+    window->setTitle("Qt5 OpenGL 4.2 Study");
     window->setSource(QUrl("qrc:///qml/main.qml"));
     window->show();
 
