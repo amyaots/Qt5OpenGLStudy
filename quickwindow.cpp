@@ -28,8 +28,7 @@ QuickWindow::QuickWindow(QWindow *parent):
     format.setDepthBufferSize(24);
     format.setVersion(4, 3);
     format.setSamples(4);
-    //QtQuick not draw on Core profile.
-    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    format.setProfile(QSurfaceFormat::CoreProfile);
     setFormat(format);
 
     m_time.start();

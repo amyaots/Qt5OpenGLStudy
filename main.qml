@@ -3,7 +3,7 @@ import QtQuick 2.0
 Item {
     Text {
         id: text
-        text: "Test project. ."
+        text: "Test project. QtQuick2 and OpenGL 4.3 Core."
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.bottom: parent.bottom
         anchors.topMargin: 10

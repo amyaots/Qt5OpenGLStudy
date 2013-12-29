@@ -1,5 +1,5 @@
-#include "quickwindow.h"              //QtQuick Window with OpenGL conext 4.3 Copability profile
-//#include "window.h"                 //basic window with OpenGL context 4.3 Core profile
+#include "quickwindow.h"              //QtQuick Window with OpenGL conext 4.2 Copability profile
+//#include "window.h"                 //basic window with OpenGL context 4.2 Core profile
 #include <QApplication>
 
 
@@ -11,7 +11,8 @@ int main(int argc, char* argv[])
     //window->setPosition(200, 100);
     window->setMinimumSize( QSize( 512, 512 ) );
     window->setResizeMode( QQuickView::SizeRootObjectToView );
-    window->setTitle("Qt5 OpenGL 4.2 Study");
+    window->setTitle("Qt5 OpenGL 4.3 Study");
+    //window->setFlags(Qt::FramelessWindowHint);
     window->setSource(QUrl("qrc:///qml/main.qml"));
     window->show();
 

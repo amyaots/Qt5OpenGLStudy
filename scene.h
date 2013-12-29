@@ -7,7 +7,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
-class QOpenGLFunctions_4_2_Core;
+class QOpenGLFunctions_4_3_Core;
 
 class Scene : public AbstractScene
 {
@@ -30,7 +30,7 @@ private:
     QOpenGLShaderProgram        m_shaderProgram;
     QOpenGLBuffer               m_vertexPositionBuffer;
     QOpenGLVertexArrayObject    m_vao;
-    QOpenGLFunctions_4_2_Core*  m_funcs;
+    QOpenGLFunctions_4_3_Core*  m_funcs;
 };
 
 #endif // SCENE_H

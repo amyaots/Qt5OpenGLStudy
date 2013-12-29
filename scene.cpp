@@ -1,7 +1,7 @@
 #include "scene.h"
 
 #include <QOpenGLContext>
-#include <QOpenGLFunctions_4_2_Core>
+#include <QOpenGLFunctions_4_3_Core>
 
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
@@ -12,10 +12,10 @@ Scene::Scene(QObject* parent)
 
 void Scene::initialise()
 {
-    m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_2_Core>();
+    m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_3_Core>();
     if (!m_funcs)
     {
-        qFatal("Requires OpenGL >= 4.2");
+        qFatal("Requires OpenGL >= 4.3");
         exit(1);
     }
     m_funcs->initializeOpenGLFunctions();
@@ -93,7 +93,7 @@ void Scene::prepareVertexBuffers()
 
 void Scene::prepareVertexArrayObject()
 {
-    //Create a VAO
+    //Create a VAO binder
     QOpenGLVertexArrayObject::Binder binder(&m_vao);
     // Bind the shader program so that we can associate variables from
     // our application to the shaders
