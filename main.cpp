@@ -1,5 +1,5 @@
-#include "quickwindow.h"              //QtQuick Window with OpenGL conext 4.2 Copability profile
-//#include "window.h"                 //basic window with OpenGL context 4.2 Core profile
+#include "quickwindow.h"              //QtQuick Window with OpenGL conext 4.3 Core profile
+//#include "window.h"                 //basic window with OpenGL context 4.3 Core profile
 #include <QApplication>
 
 
