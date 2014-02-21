@@ -74,12 +74,12 @@ void Scene::prepareShaderProgram()
 
 void Scene::prepareVertexBuffers()
 {
-    float points[] = {   -0.90f, -0.90f ,  // Triangle 1
-                          0.85f, -0.90f,
-                         -0.90f,  0.85f ,
-                          0.90f, -0.85f ,  // Triangle 2
-                          0.90f,  0.90f ,
-                         -0.85f,  0.90f  };
+    QVector2D points[] = {  QVector2D(-0.90f, -0.90f) ,  // Triangle 1
+                            QVector2D(0.85f, -0.90f),
+                            QVector2D(-0.90f,  0.85f) ,
+                            QVector2D(0.90f, -0.85f) ,  // Triangle 2
+                            QVector2D(0.90f,  0.90f) ,
+                            QVector2D(-0.85f,  0.90f) };
     m_vertexPositionBuffer.create();
     m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
     if(!m_vertexPositionBuffer.bind())
