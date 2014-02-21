@@ -56,7 +56,7 @@ void Scene::initialise()
     //glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
     //m_funcs->glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
     //
-    //glEnable( GL_DEPTH_TEST );
+    glEnable( GL_DEPTH_TEST );
 }
 
 void Scene::update(float t)
