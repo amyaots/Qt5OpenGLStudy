@@ -163,15 +163,14 @@ void Scene::prepareVertexArrayObject()
         return;
     }
     m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
-
+    m_shaderProgram.enableAttributeArray("vertex");
     if(!m_vertexColorBuffer.bind())
     {
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
 
-    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    m_shaderProgram.enableAttributeArray("vertex");
+    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, 0, 4);    
     m_shaderProgram.enableAttributeArray("color");
 }
 
