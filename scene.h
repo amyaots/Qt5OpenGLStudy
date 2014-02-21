@@ -26,9 +26,15 @@ private:
     void prepareShaderProgram();
     void prepareVertexBuffers();
     void prepareVertexArrayObject();
-
+    void quad( int a, int b, int c, int d );
+    void colorcube();
+    QVector4D                   pointsQuad[36];
+    QVector4D*                  m_vertex;
+    QVector4D*                  m_vColor;
+    QVector4D                   colorsQuad[36];
     QOpenGLShaderProgram        m_shaderProgram;
     QOpenGLBuffer               m_vertexPositionBuffer;
+    QOpenGLBuffer               m_vertexColorBuffer;
     QOpenGLVertexArrayObject    m_vao;
     QOpenGLFunctions_4_3_Core*  m_funcs;
 };

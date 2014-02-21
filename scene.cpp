@@ -6,8 +6,30 @@
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
       m_shaderProgram(),
-      m_vertexPositionBuffer(QOpenGLBuffer::VertexBuffer)
+      m_vertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
+      m_vertexColorBuffer(QOpenGLBuffer::VertexBuffer)
 {
+}
+
+void Scene::quad(int a, int b, int c, int d)
+{
+    static int Index = 0;
+    colorsQuad[Index] = m_vColor[a]; pointsQuad[Index] = m_vertex[a]; Index++;
+    colorsQuad[Index] = m_vColor[b]; pointsQuad[Index] = m_vertex[b]; Index++;
+    colorsQuad[Index] = m_vColor[c]; pointsQuad[Index] = m_vertex[c]; Index++;
+    colorsQuad[Index] = m_vColor[a]; pointsQuad[Index] = m_vertex[a]; Index++;
+    colorsQuad[Index] = m_vColor[c]; pointsQuad[Index] = m_vertex[c]; Index++;
+    colorsQuad[Index] = m_vColor[d]; pointsQuad[Index] = m_vertex[d]; Index++;
+}
+
+void Scene::colorcube()
+{
+    quad( 1, 0, 3, 2 );
+    quad( 2, 3, 7, 6 );
+    quad( 3, 0, 4, 7 );
+    quad( 6, 5, 1, 2 );
+    quad( 4, 5, 6, 7 );
+    quad( 5, 4, 0, 1 );
 }
 
 void Scene::initialise()
@@ -31,9 +53,10 @@ void Scene::initialise()
     prepareShaderProgram();
     prepareVertexBuffers();
     prepareVertexArrayObject();
-    glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
+    //glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
     //m_funcs->glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
     //
+    //glEnable( GL_DEPTH_TEST );
 }
 
 void Scene::update(float t)
@@ -50,7 +73,7 @@ void Scene::render()
 
     QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Draw stuff
-    glDrawArrays( GL_TRIANGLES, 0, 6 );
+    glDrawArrays( GL_TRIANGLES, 0, 36 );
     m_shaderProgram.release();
 }
 
@@ -74,21 +97,53 @@ void Scene::prepareShaderProgram()
 
 void Scene::prepareVertexBuffers()
 {
-    float points[] = {   -0.90f, -0.90f ,  // Triangle 1
-                          0.85f, -0.90f,
-                         -0.90f,  0.85f ,
-                          0.90f, -0.85f ,  // Triangle 2
-                          0.90f,  0.90f ,
-                         -0.85f,  0.90f  };
+    /*QVector2D points[] = {   QVector2D(-0.90, -0.90) ,  // Triangle 1
+                          QVector2D(0.85, -0.90),
+                         QVector2D(-0.90,  0.85) ,
+                          QVector2D(0.90, -0.85) ,  // Triangle 2
+                          QVector2D(0.90,  0.90) ,
+                         QVector2D(-0.85,  0.90)  };*/
+    QVector4D vertex[8] = {
+        QVector4D( -0.5, -0.5,  0.5, 1.0 ),
+        QVector4D( -0.5,  0.5,  0.5, 1.0 ),
+        QVector4D(  0.5,  0.5,  0.5, 1.0 ),
+        QVector4D(  0.5, -0.5,  0.5, 1.0 ),
+        QVector4D( -0.5, -0.5, -0.5, 1.0 ),
+        QVector4D( -0.5,  0.5, -0.5, 1.0 ),
+        QVector4D(  0.5,  0.5, -0.5, 1.0 ),
+        QVector4D(  0.5, -0.5, -0.5, 1.0 )
+    };
+    QVector4D vColor[8] = {
+            QVector4D( 0.0, 0.0, 0.0, 1.0 ),  // black
+            QVector4D( 1.0, 0.0, 0.0, 1.0 ),  // red
+            QVector4D( 1.0, 1.0, 0.0, 1.0 ),  // yellow
+            QVector4D( 0.0, 1.0, 0.0, 1.0 ),  // green
+            QVector4D( 0.0, 0.0, 1.0, 1.0 ),  // blue
+            QVector4D( 1.0, 0.0, 1.0, 1.0 ),  // magenta
+            QVector4D( 1.0, 1.0, 1.0, 1.0 ),  // white
+            QVector4D( 0.0, 1.0, 1.0, 1.0 )   // cyan
+        };
+    m_vertex = vertex;
+    m_vColor = vColor;
+    colorcube();
     m_vertexPositionBuffer.create();
-    m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
+    m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     if(!m_vertexPositionBuffer.bind())
     {
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
-    m_vertexPositionBuffer.allocate(points, sizeof(points));
+    m_vertexPositionBuffer.allocate(pointsQuad, sizeof(pointsQuad));
     m_vertexPositionBuffer.release();
+    m_vertexColorBuffer.create();
+    m_vertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    if(!m_vertexColorBuffer.bind())
+    {
+        qWarning()<<"Could not bind vertex buffer to the context";
+        return;
+    }
+    m_vertexColorBuffer.allocate(colorsQuad, sizeof(colorsQuad));
+    m_vertexColorBuffer.release();
 }
 
 void Scene::prepareVertexArrayObject()
@@ -102,9 +157,22 @@ void Scene::prepareVertexArrayObject()
         qWarning() << "Could not bind shader program to context";
         return;
     }
-    m_vertexPositionBuffer.bind();
-    m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 2);
+    if(!m_vertexPositionBuffer.bind())
+    {
+        qWarning()<<"Could not bind vertex buffer to the context";
+        return;
+    }
+    m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
+
+    if(!m_vertexColorBuffer.bind())
+    {
+        qWarning()<<"Could not bind vertex buffer to the context";
+        return;
+    }
+
+    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, 0, 4);
     m_shaderProgram.enableAttributeArray("vertex");
+    m_shaderProgram.enableAttributeArray("color");
 }
 
 void Scene::cleanup()
