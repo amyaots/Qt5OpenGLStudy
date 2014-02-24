@@ -37,6 +37,7 @@ private:
     QOpenGLBuffer               m_vertexColorBuffer;
     QOpenGLVertexArrayObject    m_vao;
     QOpenGLFunctions_4_3_Core*  m_funcs;
+    int m_frame;
 };
 
 #endif // SCENE_H

@@ -2,12 +2,14 @@
 
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_4_3_Core>
+//#include <QtGui/QScreen>
 
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
       m_shaderProgram(),
       m_vertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
-      m_vertexColorBuffer(QOpenGLBuffer::VertexBuffer)
+      m_vertexColorBuffer(QOpenGLBuffer::VertexBuffer),
+      m_frame(0)
 {
 }
 
@@ -67,14 +69,22 @@ void Scene::update(float t)
 void Scene::render()
 {
     // Clear the buffer with the current clearing color
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     m_shaderProgram.bind();
+
+    QMatrix4x4 matrix;
+    matrix.perspective(60, 4.0/3.0, 0.1, 100.0);
+    matrix.translate(0, 0, -2);
+    matrix.rotate(100.0f * m_frame/60, 1, 1, 0);
+
+    m_shaderProgram.setUniformValue("matrix", matrix);
 
     QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Draw stuff
     glDrawArrays( GL_TRIANGLES, 0, 36 );
     m_shaderProgram.release();
+    ++m_frame;
 }
 
 void Scene::resize(int w, int h)
@@ -103,7 +113,7 @@ void Scene::prepareVertexBuffers()
                           QVector2D(0.90, -0.85) ,  // Triangle 2
                           QVector2D(0.90,  0.90) ,
                          QVector2D(-0.85,  0.90)  };*/
-    QVector4D vertex[8] = {
+    m_vertex = new QVector4D[8]{
         QVector4D( -0.5, -0.5,  0.5, 1.0 ),
         QVector4D( -0.5,  0.5,  0.5, 1.0 ),
         QVector4D(  0.5,  0.5,  0.5, 1.0 ),
@@ -113,7 +123,7 @@ void Scene::prepareVertexBuffers()
         QVector4D(  0.5,  0.5, -0.5, 1.0 ),
         QVector4D(  0.5, -0.5, -0.5, 1.0 )
     };
-    QVector4D vColor[8] = {
+    m_vColor = new QVector4D[8]{
             QVector4D( 0.0, 0.0, 0.0, 1.0 ),  // black
             QVector4D( 1.0, 0.0, 0.0, 1.0 ),  // red
             QVector4D( 1.0, 1.0, 0.0, 1.0 ),  // yellow
@@ -123,8 +133,6 @@ void Scene::prepareVertexBuffers()
             QVector4D( 1.0, 1.0, 1.0, 1.0 ),  // white
             QVector4D( 0.0, 1.0, 1.0, 1.0 )   // cyan
         };
-    m_vertex = vertex;
-    m_vColor = vColor;
     colorcube();
     m_vertexPositionBuffer.create();
     m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -177,4 +185,6 @@ void Scene::prepareVertexArrayObject()
 void Scene::cleanup()
 {
     delete m_funcs;
+    delete [] m_vertex;
+    delete [] m_vColor;
 }
