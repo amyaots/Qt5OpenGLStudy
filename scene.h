@@ -33,8 +33,7 @@ private:
     QVector4D*                  m_vColor;
     QVector4D                   colorsQuad[36];
     QOpenGLShaderProgram        m_shaderProgram;
-    QOpenGLBuffer               m_vertexPositionBuffer;
-    QOpenGLBuffer               m_vertexColorBuffer;
+    QOpenGLBuffer               m_vertexBuffer;
     QOpenGLVertexArrayObject    m_vao;
     QOpenGLFunctions_4_3_Core*  m_funcs;
     int m_frame;

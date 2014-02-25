@@ -28,6 +28,7 @@ QuickWindow::QuickWindow(QWindow *parent):
     format.setDepthBufferSize(24);
     format.setVersion(4, 3);
     format.setSamples(4);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
     format.setProfile(QSurfaceFormat::CoreProfile);
     setFormat(format);
 

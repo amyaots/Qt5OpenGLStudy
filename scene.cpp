@@ -7,8 +7,7 @@
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
       m_shaderProgram(),
-      m_vertexPositionBuffer(QOpenGLBuffer::VertexBuffer),
-      m_vertexColorBuffer(QOpenGLBuffer::VertexBuffer),
+      m_vertexBuffer(QOpenGLBuffer::VertexBuffer),
       m_frame(0)
 {
 }
@@ -74,9 +73,9 @@ void Scene::render()
     m_shaderProgram.bind();
 
     QMatrix4x4 matrix;
-    matrix.perspective(60, 4.0/3.0, 0.1, 100.0);
+    matrix.perspective(60, 1, 0.1, 100.0);
     matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame/60, 1, 1, 0);
+    matrix.rotate(100.0f * m_frame/80, 1, 1, 0);
 
     m_shaderProgram.setUniformValue("matrix", matrix);
 
@@ -84,7 +83,8 @@ void Scene::render()
     // Draw stuff
     glDrawArrays( GL_TRIANGLES, 0, 36 );
     m_shaderProgram.release();
-    ++m_frame;
+    if(++m_frame==288)
+        m_frame = 0;
 }
 
 void Scene::resize(int w, int h)
@@ -107,12 +107,6 @@ void Scene::prepareShaderProgram()
 
 void Scene::prepareVertexBuffers()
 {
-    /*QVector2D points[] = {   QVector2D(-0.90, -0.90) ,  // Triangle 1
-                          QVector2D(0.85, -0.90),
-                         QVector2D(-0.90,  0.85) ,
-                          QVector2D(0.90, -0.85) ,  // Triangle 2
-                          QVector2D(0.90,  0.90) ,
-                         QVector2D(-0.85,  0.90)  };*/
     m_vertex = new QVector4D[8]{
         QVector4D( -0.5, -0.5,  0.5, 1.0 ),
         QVector4D( -0.5,  0.5,  0.5, 1.0 ),
@@ -134,24 +128,16 @@ void Scene::prepareVertexBuffers()
             QVector4D( 0.0, 1.0, 1.0, 1.0 )   // cyan
         };
     colorcube();
-    m_vertexPositionBuffer.create();
-    m_vertexPositionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    if(!m_vertexPositionBuffer.bind())
+    m_vertexBuffer.create();
+    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    if(!m_vertexBuffer.bind())
     {
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
-    m_vertexPositionBuffer.allocate(pointsQuad, sizeof(pointsQuad));
-    m_vertexPositionBuffer.release();
-    m_vertexColorBuffer.create();
-    m_vertexColorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    if(!m_vertexColorBuffer.bind())
-    {
-        qWarning()<<"Could not bind vertex buffer to the context";
-        return;
-    }
-    m_vertexColorBuffer.allocate(colorsQuad, sizeof(colorsQuad));
-    m_vertexColorBuffer.release();
+    m_vertexBuffer.allocate(pointsQuad, sizeof(pointsQuad)+sizeof(colorsQuad));
+    m_vertexBuffer.write(sizeof(pointsQuad), colorsQuad, sizeof(colorsQuad));
+    m_vertexBuffer.release();
 }
 
 void Scene::prepareVertexArrayObject()
@@ -165,25 +151,21 @@ void Scene::prepareVertexArrayObject()
         qWarning() << "Could not bind shader program to context";
         return;
     }
-    if(!m_vertexPositionBuffer.bind())
+    if(!m_vertexBuffer.bind())
     {
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
     m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
     m_shaderProgram.enableAttributeArray("vertex");
-    if(!m_vertexColorBuffer.bind())
-    {
-        qWarning()<<"Could not bind vertex buffer to the context";
-        return;
-    }
-
-    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, 0, 4);    
+    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, sizeof(colorsQuad), 4);
     m_shaderProgram.enableAttributeArray("color");
+    m_shaderProgram.release();
 }
 
 void Scene::cleanup()
 {
+    m_vertexBuffer.destroy();
     delete m_funcs;
     delete [] m_vertex;
     delete [] m_vColor;
