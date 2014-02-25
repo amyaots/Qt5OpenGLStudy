@@ -77,6 +77,6 @@ void Window::keyPressEvent(QKeyEvent *e)
             else setWindowState(Qt::WindowFullScreen);
             break;
         default:
-            Window::keyPressEvent(e);
+            QWindow::keyPressEvent(e);
     }
 }
