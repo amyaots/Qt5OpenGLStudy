@@ -1,11 +1,10 @@
 #include "scene.h"
-
 #include <QOpenGLContext>
-#include <QOpenGLFunctions_4_3_Core>
-//#include <QtGui/QScreen>
 
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
+      pointsQuad(36),
+      colorsQuad(36),
       m_shaderProgram(),
       m_vertexBuffer(QOpenGLBuffer::VertexBuffer),
       m_frame(0)
@@ -35,13 +34,13 @@ void Scene::colorcube()
 
 void Scene::initialise()
 {
-    m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_3_Core>();
-    if (!m_funcs)
+    //m_funcs = m_context->versionFunctions<QOpenGLFunctions_4_3_Core>();
+    if (!m_context->versionFunctions<QOpenGLFunctions_4_3_Core>())
     {
         qFatal("Requires OpenGL >= 4.3");
         exit(1);
-    }
-    m_funcs->initializeOpenGLFunctions();
+    }    
+    initializeOpenGLFunctions();
     // get context opengl-version
     qDebug() << "Context valid: " << context()->isValid();
     qDebug() << "Used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
@@ -54,8 +53,8 @@ void Scene::initialise()
     prepareShaderProgram();
     prepareVertexBuffers();
     prepareVertexArrayObject();
-    //glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
-    //m_funcs->glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
+    glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
+    //glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
     //
     glEnable( GL_DEPTH_TEST );
 }
@@ -67,11 +66,12 @@ void Scene::update(float t)
 
 void Scene::render()
 {
+    glClearColor(0.12f, 0.22f, 0.23f, 1.0f);
+    QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Clear the buffer with the current clearing color
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_shaderProgram.bind();
-
     QMatrix4x4 matrix;
     matrix.perspective(60, 1, 0.1, 100.0);
     matrix.translate(0, 0, -2);
@@ -79,7 +79,6 @@ void Scene::render()
 
     m_shaderProgram.setUniformValue("matrix", matrix);
 
-    QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Draw stuff
     glDrawArrays( GL_TRIANGLES, 0, 36 );
     m_shaderProgram.release();
@@ -128,6 +127,8 @@ void Scene::prepareVertexBuffers()
             QVector4D( 0.0, 1.0, 1.0, 1.0 )   // cyan
         };
     colorcube();
+    delete [] m_vertex;
+    delete [] m_vColor;
     m_vertexBuffer.create();
     m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     if(!m_vertexBuffer.bind())
@@ -135,9 +136,17 @@ void Scene::prepareVertexBuffers()
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
-    m_vertexBuffer.allocate(pointsQuad, sizeof(pointsQuad)+sizeof(colorsQuad));
-    m_vertexBuffer.write(sizeof(pointsQuad), colorsQuad, sizeof(colorsQuad));
+    m_vertexBuffer.allocate(pointsQuad.data(),pointsQuad.length()*sizeof(QVector4D)+
+                            colorsQuad.length()*sizeof(QVector4D));
+    m_vertexBuffer.write(pointsQuad.length()*sizeof(QVector4D), colorsQuad.data(),
+                         colorsQuad.length()*sizeof(QVector4D));
     m_vertexBuffer.release();
+    //classic OpenGL VBO
+    /*glGenBuffers(1, &m_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pointsQuad)+sizeof(colorsQuad), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pointsQuad), pointsQuad);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsQuad), sizeof(colorsQuad), colorsQuad);*/
 }
 
 void Scene::prepareVertexArrayObject()
@@ -156,17 +165,17 @@ void Scene::prepareVertexArrayObject()
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
-    m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
     m_shaderProgram.enableAttributeArray("vertex");
-    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, sizeof(colorsQuad), 4);
+    m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
     m_shaderProgram.enableAttributeArray("color");
+    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, pointsQuad.length()*sizeof(QVector4D), 4);    
     m_shaderProgram.release();
+    m_vertexBuffer.release();
 }
 
 void Scene::cleanup()
 {
+    //glInvalidateBufferData(m_vbo);
     m_vertexBuffer.destroy();
-    delete m_funcs;
-    delete [] m_vertex;
-    delete [] m_vColor;
+    //delete m_funcs;
 }
