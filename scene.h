@@ -28,10 +28,10 @@ private:
     void prepareVertexArrayObject();
     void quad( int a, int b, int c, int d );
     void colorcube();
-    QVector<QVector4D>                   pointsQuad;
+    QVector<QVector4D>          pointsQuad;
     QVector4D*                  m_vertex;
     QVector4D*                  m_vColor;
-    QVector<QVector4D>                   colorsQuad;
+    QVector<QVector4D>          colorsQuad;
     QOpenGLShaderProgram        m_shaderProgram;
     QOpenGLBuffer               m_vertexBuffer;
     //GLuint                      m_vbo;
