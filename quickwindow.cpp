@@ -61,6 +61,16 @@ void QuickWindow::resizeEvent( QResizeEvent* e )
 void QuickWindow::update()
 {
     float time = m_time.elapsed()/1000.0f;
+    static float lastTime = 0.0;
+    static float frames = 0.0;
+    ++frames;
+    if(time - lastTime > 1.0)
+    {
+        lastTime = time;
+        m_fps = frames;
+        emit fpsChanged();
+        frames = 0;
+    }
     m_scene->update(time);
     QQuickView::update();
 }
@@ -73,7 +83,12 @@ void QuickWindow::keyPressEvent(QKeyEvent *e)
             QCoreApplication::instance()->quit();
             break;
         case Qt::Key_F1:
-            if(windowState()==Qt::WindowFullScreen)
+            if(windowState()== Qt::WindowMaximized)
+                setWindowState(Qt::WindowNoState);
+            else setWindowState(Qt::WindowMaximized);
+            break;
+        case Qt::Key_F2:
+            if(windowState()== Qt::WindowFullScreen)
                 setWindowState(Qt::WindowNoState);
             else setWindowState(Qt::WindowFullScreen);
             break;
