@@ -5,7 +5,8 @@ import QtQuick.Controls.Styles 1.1
 Item {
 id: root
     Text {
-        id: text
+        objectName: "text1"
+        id: text1
         color: "#a6a6a6"
         text: "Test project. QtQuick2 and OpenGL 4.3 Core."
         anchors.horizontalCenter: parent.horizontalCenter;
@@ -52,8 +53,8 @@ id: root
         }
         style: ButtonStyle {
         background: Rectangle {
-                implicitWidth: 55
-                implicitHeight: 55
+                implicitWidth: 50
+                implicitHeight: 50
                 //border.width: control.activeFocus ? 2 : 1
                 //border.color: "#888"
                 radius: 5
@@ -65,7 +66,7 @@ id: root
                 Text {
                     text: "H"
                     font.family: "Arial"
-                    font.pointSize: 28
+                    font.pointSize: 24
                     color: "white"
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter
@@ -84,8 +85,8 @@ id: root
         anchors.topMargin: 20
         style: ButtonStyle {
         background: Rectangle {
-                implicitWidth: 55
-                implicitHeight: 55
+                implicitWidth: 50
+                implicitHeight: 50
                 //border.width: control.activeFocus ? 2 : 1
                 border.color: Qt.lighter(color)
                 //radius: 5
@@ -97,7 +98,7 @@ id: root
                 Text {
                     text: "SO"
                     font.family: "Arial"
-                    font.pointSize: 24
+                    font.pointSize: 20
                     color: "white"
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter
