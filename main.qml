@@ -8,7 +8,7 @@ id: root
         objectName: "text1"
         id: text1
         color: "#a6a6a6"
-        text: "Test project. QtQuick2 and OpenGL 4.3 Core."
+        text: qsTr("EasyChemystry. Myaots Aleksandr 2014")
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.bottom: parent.bottom
         anchors.topMargin: 10
@@ -44,29 +44,29 @@ id: root
     }
     Button {
         id: button1
-        tooltip: qsTr("Таблица Менделеева")
+        //tooltip: qsTr("Таблица Менделеева")
         anchors{
             left: parent.left
-            leftMargin: 20
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: -100
+            leftMargin: 50
+            top: parent.top
+            topMargin: 20
+            //verticalCenter: parent.verticalCenter
+            //verticalCenterOffset: -100
         }
         style: ButtonStyle {
         background: Rectangle {
-                implicitWidth: 50
-                implicitHeight: 50
-                //border.width: control.activeFocus ? 2 : 1
-                //border.color: "#888"
-                radius: 5
+                implicitWidth: 130
+                implicitHeight: 45
+                border.color: Qt.lighter(color)
                 color: control.pressed ? "#00886d" : "#00d1b6"
                 /*gradient: Gradient {
                     GradientStop { position: 0 ; color: control.pressed ? "#ccc" : "#eee" }
                     GradientStop { position: 1 ; color: control.pressed ? "#aaa" : "#ccc" }
                 }*/
                 Text {
-                    text: "H"
+                    text: qsTr("Таблица\n Менделеева")
                     font.family: "Arial"
-                    font.pointSize: 24
+                    font.pointSize: 12
                     color: "white"
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter
@@ -77,28 +77,22 @@ id: root
     }
     Button {
         id: button2
-        tooltip: qsTr("Таблица Растворимости")
-        anchors.left: parent.left
+        anchors.left: button1.right
         anchors.leftMargin: 20
         //anchors.verticalCenter: parent.verticalCenter
-        anchors.top: button1.bottom
+        anchors.top: parent.top
         anchors.topMargin: 20
         style: ButtonStyle {
         background: Rectangle {
-                implicitWidth: 50
-                implicitHeight: 50
+                implicitWidth: 130
+                implicitHeight: 45
                 //border.width: control.activeFocus ? 2 : 1
                 border.color: Qt.lighter(color)
-                //radius: 5
                 color: control.pressed ? "#00886d" : "#00d1b6"
-                /*gradient: Gradient {
-                    GradientStop { position: 0 ; color: control.pressed ? "#ccc" : "#eee" }
-                    GradientStop { position: 1 ; color: control.pressed ? "#aaa" : "#ccc" }
-                }*/
                 Text {
-                    text: "SO"
+                    text: qsTr("Таблица\n растворимости")
                     font.family: "Arial"
-                    font.pointSize: 20
+                    font.pointSize: 12
                     color: "white"
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter
