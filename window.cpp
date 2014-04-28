@@ -47,7 +47,7 @@ void Window::initializeGL()
 void Window::paintGL()
 {
     m_context->makeCurrent(this);
-    m_scene->render();
+    //m_scene->render();
     m_context->swapBuffers(this);
 }
 

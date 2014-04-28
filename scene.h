@@ -18,7 +18,7 @@ public:
 
     virtual void initialise();
     virtual void update(float t);
-    virtual void render();
+    virtual void render(float w, float h);
     virtual void resize(int w, int h);
     virtual void cleanup();
 

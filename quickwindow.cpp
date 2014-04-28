@@ -44,7 +44,7 @@ void QuickWindow::initialiseOpenGLScene()
 
 void QuickWindow::renderOpenGLScene()
 {
-    m_scene->render();
+    m_scene->render( width(), height() );
 }
 
 void QuickWindow::cleanupOpenGLScene()

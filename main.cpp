@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     window->rootContext()->setContextProperty("windowq", window);       //In QML
     window->setResizeMode( QQuickView::SizeRootObjectToView );
     window->setTitle("Qt5 OpenGL 4.3 Study");
-    window->setFlags(Qt::FramelessWindowHint);
+    //window->setFlags(Qt::FramelessWindowHint);
     window->setSource(QUrl("qrc:///qml/main.qml"));
     window->show();
 

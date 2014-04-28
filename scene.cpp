@@ -64,7 +64,7 @@ void Scene::update(float t)
     Q_UNUSED(t);
 }
 
-void Scene::render()
+void Scene::render(float w, float h)
 {
     glClearColor(0.12f, 0.22f, 0.23f, 1.0f);
     QOpenGLVertexArrayObject::Binder binder( &m_vao );
@@ -73,8 +73,8 @@ void Scene::render()
 
     m_shaderProgram.bind();
     QMatrix4x4 matrix;
-    matrix.perspective(60, 1, 0.1, 100.0);
-    matrix.translate(0, 0, -2);
+    matrix.perspective(72.f, w/h, 0.1f, 100.f);
+    matrix.lookAt(QVector3D(0.f,0.f,-2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
     matrix.rotate(100.0f * m_frame/80, 1, 1, 0);
 
     m_shaderProgram.setUniformValue("matrix", matrix);
