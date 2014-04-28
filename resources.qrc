@@ -2,6 +2,9 @@
     <qresource prefix="/shaders">
         <file>basic.vert</file>
         <file>basic.frag</file>
+        <file>basic.tcs</file>
+        <file>basic.tes</file>
+        <file>basic.geom</file>
     </qresource>
     <qresource prefix="/qml">
         <file>main.qml</file>
