@@ -29,6 +29,7 @@ private:
 
     QOpenGLShaderProgram        m_shaderProgram;
     QOpenGLBuffer               m_vertexPositionBuffer;
+    QOpenGLBuffer               m_indexBuffer;
     QOpenGLVertexArrayObject    m_vao;
     QOpenGLFunctions_4_3_Core*  m_funcs;
 };
