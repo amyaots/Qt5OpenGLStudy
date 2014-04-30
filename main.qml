@@ -66,7 +66,7 @@ id: root
                 Text {
                     text: qsTr("Таблица\n Менделеева")
                     font.family: "Arial"
-                    font.pointSize: 12
+                    font.pointSize: 11
                     color: "white"
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter
@@ -92,7 +92,7 @@ id: root
                 Text {
                     text: qsTr("Таблица\n растворимости")
                     font.family: "Arial"
-                    font.pointSize: 12
+                    font.pointSize: 11
                     color: "white"
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter
