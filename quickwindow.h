@@ -26,6 +26,7 @@ signals:
 protected:
     void resizeEvent( QResizeEvent* e );
     void keyPressEvent(QKeyEvent *e);
+    void wheelEvent(QWheelEvent *e);            //Zoom in-out
 
 private:
     AbstractScene*  m_scene;
