@@ -21,6 +21,8 @@ public:
     virtual void render(float w, float h);
     virtual void resize(int w, int h);
     virtual void cleanup();
+    void setFOV(const quint32 inFOV) {m_fov = inFOV;}
+    quint32 getFOV()const {return m_fov;}
 
 private:
     void prepareShaderProgram();
@@ -37,6 +39,7 @@ private:
     //GLuint                      m_vbo;
     QOpenGLVertexArrayObject    m_vao;
     int m_frame;
+    quint32 m_fov;
 };
 
 #endif // SCENE_H

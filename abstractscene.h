@@ -36,6 +36,8 @@ public:
       Called when screen is resized
       */
     virtual void resize( int w, int h ) = 0;
+    virtual void setFOV(const quint32 inFOV) = 0;
+    virtual quint32 getFOV()const  = 0;
 
 protected:
     QOpenGLContext* m_context;

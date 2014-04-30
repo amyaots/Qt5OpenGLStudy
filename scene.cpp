@@ -48,7 +48,7 @@ void Scene::initialise()
     qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
     qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-
+    setFOV(72);
     //Init resources
     prepareShaderProgram();
     prepareVertexBuffers();
@@ -56,7 +56,7 @@ void Scene::initialise()
     glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
     //glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
     //
-    glEnable( GL_DEPTH_TEST );
+    glEnable( GL_DEPTH_TEST | GL_CULL_FACE);
 }
 
 void Scene::update(float t)
@@ -73,7 +73,7 @@ void Scene::render(float w, float h)
 
     m_shaderProgram.bind();
     QMatrix4x4 matrix;
-    matrix.perspective(72.f, w/h, 0.1f, 100.f);
+    matrix.perspective(getFOV(), w/h, 0.1f, 100.f);
     matrix.lookAt(QVector3D(0.f,0.f,-2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
     matrix.rotate(100.0f * m_frame/80, 1, 1, 0);
 
