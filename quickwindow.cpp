@@ -103,11 +103,11 @@ void QuickWindow::wheelEvent(QWheelEvent *e)
     if(m_scene->getFOV()>=30 && m_scene->getFOV()<=170)
     {
         m_scene->setFOV(m_scene->getFOV()+(e->delta()/40));
-        if(m_scene->getFOV()>=170)
+        if(m_scene->getFOV()>170)
         {
             m_scene->setFOV(170);
         }
-        if(m_scene->getFOV()<=30)
+        if(m_scene->getFOV()<30)
         {
             m_scene->setFOV(30);
         }
