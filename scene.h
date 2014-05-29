@@ -28,15 +28,17 @@ private:
     void prepareShaderProgram();
     void prepareVertexBuffers();
     void prepareVertexArrayObject();
-    void quad( int a, int b, int c, int d );
-    void colorcube();
-    QVector<QVector4D>          pointsQuad;
-    QVector4D*                  m_vertex;
-    QVector4D*                  m_vColor;
-    QVector<QVector4D>          colorsQuad;
+    void genSphere();
     QOpenGLShaderProgram        m_shaderProgram;
     QOpenGLBuffer               m_vertexBuffer;
+    QOpenGLBuffer               m_indexBuffer;
     //GLuint                      m_vbo;
+    QVector<unsigned int> el;
+    QVector<float> v;
+    int indexCount() const { return 6 * m_slices * m_rings; }
+    float m_radius;
+    int m_rings;  // Rings of latitude
+    int m_slices; // Longitude
     QOpenGLVertexArrayObject    m_vao;
     int m_frame;
     quint32 m_fov;

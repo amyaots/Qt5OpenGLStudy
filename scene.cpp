@@ -1,35 +1,106 @@
 #include "scene.h"
 #include <QOpenGLContext>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+const float pi = M_PI;
+const float twoPi = 2.0 * pi;
+
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
-      pointsQuad(36),
-      colorsQuad(36),
       m_shaderProgram(),
       m_vertexBuffer(QOpenGLBuffer::VertexBuffer),
-      m_frame(0)
+      m_indexBuffer(QOpenGLBuffer::IndexBuffer),
+      m_frame(0),
+      m_radius(0.2),
+      m_rings(30),
+      m_slices(30)
 {
 }
 
-void Scene::quad(int a, int b, int c, int d)
+void Scene::genSphere()
 {
-    static int Index = 0;
-    colorsQuad[Index] = m_vColor[a]; pointsQuad[Index] = m_vertex[a]; Index++;
-    colorsQuad[Index] = m_vColor[b]; pointsQuad[Index] = m_vertex[b]; Index++;
-    colorsQuad[Index] = m_vColor[c]; pointsQuad[Index] = m_vertex[c]; Index++;
-    colorsQuad[Index] = m_vColor[a]; pointsQuad[Index] = m_vertex[a]; Index++;
-    colorsQuad[Index] = m_vColor[c]; pointsQuad[Index] = m_vertex[c]; Index++;
-    colorsQuad[Index] = m_vColor[d]; pointsQuad[Index] = m_vertex[d]; Index++;
-}
+    int faces = (m_slices - 2) * m_rings +           // Number of "rectangular" faces
+            (m_rings * 2); // and one ring for the top and bottom caps
+    int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
+    QVector<float>& vertices = v;
+    QVector<unsigned int>& indices = el;
+    vertices.resize( 3 * nVerts );
+    indices.resize( 6 * faces );
+    const float dTheta = twoPi / static_cast<float>( m_slices );
+    const float dPhi = pi / static_cast<float>( m_rings );
+    const float du = 1.0f / static_cast<float>( m_slices );
+    const float dv = 1.0f / static_cast<float>( m_rings );
 
-void Scene::colorcube()
-{
-    quad( 1, 0, 3, 2 );
-    quad( 2, 3, 7, 6 );
-    quad( 3, 0, 4, 7 );
-    quad( 6, 5, 1, 2 );
-    quad( 4, 5, 6, 7 );
-    quad( 5, 4, 0, 1 );
+    // Iterate over latitudes (rings)
+    int index = 0;
+    for ( int lat = 0; lat < m_rings + 1; ++lat )
+    {
+        const float phi = pi / 2.0f - static_cast<float>( lat ) * dPhi;
+        const float cosPhi = cosf( phi );
+        const float sinPhi = sinf( phi );
+        const float v = 1.0f - static_cast<float>( lat ) * dv;
+
+        // Iterate over longitudes (slices)
+        for ( int lon = 0; lon < m_slices + 1; ++lon )
+        {
+            const float theta = static_cast<float>( lon ) * dTheta;
+            const float cosTheta = cosf( theta );
+            const float sinTheta = sinf( theta );
+            //const float u = static_cast<float>( lon ) * du;
+
+            vertices[index]   = m_radius * cosTheta * cosPhi;
+            vertices[index+1] = m_radius * sinPhi;
+            vertices[index+2] = m_radius * sinTheta * cosPhi;
+            index += 3;
+        }
+    }
+    int elIndex = 0;
+
+    // top cap
+    {
+        const int nextRingStartIndex = m_slices + 1;
+        for ( int j = 0; j < m_slices; ++j )
+        {
+            indices[elIndex] = nextRingStartIndex + j;
+            indices[elIndex+1] = 0;
+            indices[elIndex+2] = nextRingStartIndex + j + 1;
+            elIndex += 3;
+        }
+    }
+
+    for ( int i = 1; i < (m_rings - 1); ++i )
+    {
+        const int ringStartIndex = i * ( m_slices + 1 );
+        const int nextRingStartIndex = ( i + 1 ) * ( m_slices + 1 );
+
+        for ( int j = 0; j < m_slices; ++j )
+        {
+            // Split the quad into two triangles
+            indices[elIndex]   = ringStartIndex + j;
+            indices[elIndex+1] = ringStartIndex + j + 1;
+            indices[elIndex+2] = nextRingStartIndex + j;
+            indices[elIndex+3] = nextRingStartIndex + j;
+            indices[elIndex+4] = ringStartIndex + j + 1;
+            indices[elIndex+5] = nextRingStartIndex + j + 1;
+
+            elIndex += 6;
+        }
+    }
+
+    // bottom cap
+    {
+        const int ringStartIndex = (m_rings - 1) * ( m_slices + 1);
+        const int nextRingStartIndex = (m_rings) * ( m_slices + 1);
+        for ( int j = 0; j < m_slices; ++j )
+        {
+            indices[elIndex] = ringStartIndex + j;
+            indices[elIndex+1] = nextRingStartIndex;
+            indices[elIndex+2] = ringStartIndex + j + 1;
+            elIndex += 3;
+        }
+    }
 }
 
 void Scene::initialise()
@@ -48,14 +119,12 @@ void Scene::initialise()
     qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
     qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-    setFOV(72);
+    setFOV(52);
     //Init resources
     prepareShaderProgram();
     prepareVertexBuffers();
     prepareVertexArrayObject();
     glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
-    //glDispatchCompute( 512 / 16, 512 / 16, 1 );           //test function in OpenGL 4.3
-    //
     glEnable( GL_DEPTH_TEST | GL_CULL_FACE);
 }
 
@@ -74,16 +143,20 @@ void Scene::render(float w, float h)
     m_shaderProgram.bind();
     QMatrix4x4 matrix;
     matrix.perspective(getFOV(), w/h, 0.1f, 100.f);
-    matrix.lookAt(QVector3D(0.f,0.f,-2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
-    matrix.rotate(100.0f * m_frame/80, 1, 1, 0);
-
-    m_shaderProgram.setUniformValue("matrix", matrix);
-
+    //matrix.frustum(-0.5f, 0.5f, -0.5f, 0.5f, 0.1f, 100.f);
+    matrix.lookAt(QVector3D(0.f,0.f,2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
+    //matrix.rotate(100.0f * m_frame/80, 1, 1, 0);
     // Draw stuff
-    glDrawArrays( GL_TRIANGLES, 0, 36 );
+    //glDrawArrays( GL_TRIANGLES, 0, 36 );
+    matrix.translate(1.f,0.0f,0.0f);
+    m_shaderProgram.setUniformValue("matrix", matrix);
+    glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
+    matrix.translate(-0.5f,0.0f,0.0f);
+    m_shaderProgram.setUniformValue("matrix", matrix);
+    glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
     m_shaderProgram.release();
-    if(++m_frame==288)
-        m_frame = 0;
+    //if(++m_frame==288)
+    //    m_frame = 0;
 }
 
 void Scene::resize(int w, int h)
@@ -106,29 +179,7 @@ void Scene::prepareShaderProgram()
 
 void Scene::prepareVertexBuffers()
 {
-    m_vertex = new QVector4D[8]{
-        QVector4D( -0.5, -0.5,  0.5, 1.0 ),
-        QVector4D( -0.5,  0.5,  0.5, 1.0 ),
-        QVector4D(  0.5,  0.5,  0.5, 1.0 ),
-        QVector4D(  0.5, -0.5,  0.5, 1.0 ),
-        QVector4D( -0.5, -0.5, -0.5, 1.0 ),
-        QVector4D( -0.5,  0.5, -0.5, 1.0 ),
-        QVector4D(  0.5,  0.5, -0.5, 1.0 ),
-        QVector4D(  0.5, -0.5, -0.5, 1.0 )
-    };
-    m_vColor = new QVector4D[8]{
-            QVector4D( 0.0, 0.0, 0.0, 1.0 ),  // black
-            QVector4D( 1.0, 0.0, 0.0, 1.0 ),  // red
-            QVector4D( 1.0, 1.0, 0.0, 1.0 ),  // yellow
-            QVector4D( 0.0, 1.0, 0.0, 1.0 ),  // green
-            QVector4D( 0.0, 0.0, 1.0, 1.0 ),  // blue
-            QVector4D( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-            QVector4D( 1.0, 1.0, 1.0, 1.0 ),  // white
-            QVector4D( 0.0, 1.0, 1.0, 1.0 )   // cyan
-        };
-    colorcube();
-    delete [] m_vertex;
-    delete [] m_vColor;
+    genSphere();
     m_vertexBuffer.create();
     m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     if(!m_vertexBuffer.bind())
@@ -136,17 +187,12 @@ void Scene::prepareVertexBuffers()
         qWarning()<<"Could not bind vertex buffer to the context";
         return;
     }
-    m_vertexBuffer.allocate(pointsQuad.data(),pointsQuad.length()*sizeof(QVector4D)+
-                            colorsQuad.length()*sizeof(QVector4D));
-    m_vertexBuffer.write(pointsQuad.length()*sizeof(QVector4D), colorsQuad.data(),
-                         colorsQuad.length()*sizeof(QVector4D));
+    m_vertexBuffer.allocate( v.constData(), v.size() * sizeof( float ) );
     m_vertexBuffer.release();
-    //classic OpenGL VBO
-    /*glGenBuffers(1, &m_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(pointsQuad)+sizeof(colorsQuad), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pointsQuad), pointsQuad);
-    glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsQuad), sizeof(colorsQuad), colorsQuad);*/
+    m_indexBuffer.create();
+    m_indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    m_indexBuffer.bind();
+    m_indexBuffer.allocate( el.constData(), el.size() * sizeof( unsigned int ) );
 }
 
 void Scene::prepareVertexArrayObject()
@@ -166,11 +212,10 @@ void Scene::prepareVertexArrayObject()
         return;
     }
     m_shaderProgram.enableAttributeArray("vertex");
-    m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
-    m_shaderProgram.enableAttributeArray("color");
-    m_shaderProgram.setAttributeBuffer("color", GL_FLOAT, pointsQuad.length()*sizeof(QVector4D), 4);    
+    m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
     m_shaderProgram.release();
     m_vertexBuffer.release();
+    m_indexBuffer.bind();
 }
 
 void Scene::cleanup()
