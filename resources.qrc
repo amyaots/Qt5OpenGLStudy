@@ -5,5 +5,9 @@
     </qresource>
     <qresource prefix="/qml">
         <file>main.qml</file>
+        <file>AtomNum.qml</file>
+        <file>Cell.qml</file>
+        <file>DiplomUI.qml</file>
+        <file>elements.xml</file>
     </qresource>
 </RCC>
