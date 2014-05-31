@@ -48,7 +48,6 @@ void Scene::genSphere()
             const float theta = static_cast<float>( lon ) * dTheta;
             const float cosTheta = cosf( theta );
             const float sinTheta = sinf( theta );
-            //const float u = static_cast<float>( lon ) * du;
 
             vertices[index]   = m_radius * cosTheta * cosPhi;
             vertices[index+1] = m_radius * sinPhi;
@@ -129,8 +128,8 @@ void Scene::initialise()
     prepareShaderProgram();
     prepareVertexBuffers();
     prepareVertexArrayObject();
-    glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
-    glEnable( GL_DEPTH_TEST | GL_CULL_FACE);
+    glClearColor(0.2f, 0.0f, 0.5f, 1.0f);    //
+    glEnable(GL_DEPTH_TEST |GL_CULL_FACE);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
@@ -141,29 +140,39 @@ void Scene::update(float t)
 
 void Scene::render(float w, float h)
 {
+    glDepthMask( true );
+    glEnable(GL_DEPTH_TEST );
     glClearColor(0.12f, 0.22f, 0.23f, 1.0f);
     QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Clear the buffer with the current clearing color
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     m_shaderProgram.bind();
-    QMatrix4x4 matrix; QMatrix4x4 view; QMatrix4x4 proj;
+    QMatrix4x4 matrix, model2, model3, rot; QMatrix4x4 view; QMatrix4x4 proj;
     matrix.setToIdentity();
+    model2.setToIdentity();
+    model3.setToIdentity();
+    rot.setToIdentity();
+    rot.translate(-0.05f,0.2f,0.0f);
+    rot.rotate(100*m_frame/80, 0.2f, 1, 0);
     proj.perspective(getFOV(), w/h, 0.1f, 100.f);
     view.lookAt(QVector3D(0.f,0.f,2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
     m_shaderProgram.setUniformValue("proj", proj);
     m_shaderProgram.setUniformValue("view", view);
-    QMatrix4x4 modelViewMatrix = view * matrix;
-    QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    m_shaderProgram.setUniformValue( "normalMatrix", normalMatrix );
-
+    m_shaderProgram.setUniformValue( "material.diff", QVector3D( 0.1f, 0.0f, 0.5f ) );
     // Draw stuff
     //glDrawArrays( GL_TRIANGLES, 0, 36 );
-    matrix.translate(0.6f,0.0f,0.0f);
-    m_shaderProgram.setUniformValue("model", matrix);
+    matrix.translate(0.05f,-0.2f,-0.3f);
+    //matrix.rotate(100*m_frame/80, 0, 1, 0);
+    //matrix.translate(0.6f,0.0f,0.0f);
+    m_shaderProgram.setUniformValue("model", rot*matrix);
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
-    matrix.translate(-0.5f,0.0f,0.0f);
-    matrix.rotate(175, 1, 1, 0);
-    m_shaderProgram.setUniformValue("model", matrix);
+    model2.translate(0.05f,-0.2f,0.3f);
+    m_shaderProgram.setUniformValue("model", rot*model2);
+    glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
+    model3.translate(-0.05f,0.2f,0.0f);
+    model3.scale(1.2f);
+    m_shaderProgram.setUniformValue("model", model3);
+    m_shaderProgram.setUniformValue( "material.diff", QVector3D( 0.5f, 0.0f, 0.1f ) );
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
     m_shaderProgram.release();
     if(++m_frame==288)
@@ -199,10 +208,14 @@ void Scene::prepareVertexBuffers()
         return;
     }
     m_vertexBuffer.allocate( v.constData(), v.size() * sizeof( float ) );
-    //m_vertexBuffer.release();
+    m_vertexBuffer.release();
     m_normalBuffer.create();
     m_normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_normalBuffer.bind();
+    if(!m_normalBuffer.bind())
+    {
+        qWarning()<<"Could not bind vertex buffer to the context";
+        return;
+    }
     m_normalBuffer.allocate( n.constData(), n.size() * sizeof( float ) );
     m_indexBuffer.create();
     m_indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
@@ -228,14 +241,20 @@ void Scene::prepareVertexArrayObject()
     }
     m_shaderProgram.enableAttributeArray("vertex");
     m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
-    m_normalBuffer.bind();
+    m_vertexBuffer.release();
+    if(!m_normalBuffer.bind())
+    {
+        qWarning()<<"Could not bind normal buffer to the context";
+        return;
+    }
     m_shaderProgram.enableAttributeArray( "vertexNormal" );
     m_shaderProgram.setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
-    m_shaderProgram.setUniformValue( "light.position", QVector4D( 0.0f, 0.0f, 0.0f, 0.0f ) );
+    m_normalBuffer.release();
+    m_shaderProgram.setUniformValue( "light.position", QVector4D( -0.5f, 1.f, 0.0f, 0.0f ) );
     m_shaderProgram.setUniformValue( "light.intensity", QVector3D( 1.0f, 1.0f, 1.0f ) );
-    m_shaderProgram.setUniformValue( "material.ks", QVector3D( 0.95f, 0.95f, 0.95f ) );
+    m_shaderProgram.setUniformValue( "material.ks", QVector3D( 0.90f, 0.90f, 0.90f ) );
     m_shaderProgram.setUniformValue( "material.ka", QVector3D( 0.1f, 0.1f, 0.1f ) );
-    m_shaderProgram.setUniformValue( "material.shininess", 100.0f );
+    m_shaderProgram.setUniformValue( "material.shininess", 50.0f );
     m_shaderProgram.release();
     m_vertexBuffer.release();
     m_indexBuffer.bind();
