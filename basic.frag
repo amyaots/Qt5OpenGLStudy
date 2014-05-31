@@ -11,6 +11,7 @@ struct MaterialInfo
 {
     vec3 ka;            // Ambient reflectivity
     vec3 ks;            // Specular reflectivity
+    vec3 diff;          // Color
     float shininess;    // Specular shininess factor
 };
 uniform MaterialInfo material;
@@ -26,7 +27,7 @@ vec3 phongModel( vec3 pos, vec3 norm )
     vec3 r = reflect( -s, norm );
     vec3 ambient = light.intensity * material.ka;
     float sDotN = max( dot( s, norm ), 0.0 );
-    vec3 diffuse = light.intensity * vec3(0.1,0.0,0.5) * sDotN;
+    vec3 diffuse = light.intensity * material.diff * sDotN;
     vec3 spec = vec3( 0.0 );
     if ( sDotN > 0.0 )
     {
@@ -39,5 +40,5 @@ vec3 phongModel( vec3 pos, vec3 norm )
 
 void main( void )
 {
-    fragColor = vec4( normalize(normal), 1.0 );
+    fragColor = vec4( phongModel( position,normalize(normal)), 1.0 );
 }
