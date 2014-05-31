@@ -9,5 +9,6 @@
         <file>Cell.qml</file>
         <file>DiplomUI.qml</file>
         <file>elements.xml</file>
+        <file>reactions.xml</file>
     </qresource>
 </RCC>
