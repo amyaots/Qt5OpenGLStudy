@@ -13,7 +13,7 @@ uniform mat3 normalMatrix;
 
 void main( void )
 {
-    normal = normalMatrix * vertexNormal;
+    normal = mat3(view*model) * vertexNormal;
     position = vec4(view*model*vec4(vertex,1.0)).xyz;
     gl_Position = proj*vec4(position,1.0);
 
