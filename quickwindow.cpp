@@ -5,6 +5,8 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 #include <QCoreApplication>
+#include <QQmlProperty>
+#include <QQuickItem>
 
 
 QuickWindow::QuickWindow(QWindow *parent):
@@ -29,7 +31,7 @@ QuickWindow::QuickWindow(QWindow *parent):
     format.setVersion(4, 3);
     format.setSamples(4);
     format.setRenderableType(QSurfaceFormat::OpenGL);
-    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
     setFormat(format);
 
     m_time.start();
@@ -99,17 +101,20 @@ void QuickWindow::keyPressEvent(QKeyEvent *e)
 
 void QuickWindow::wheelEvent(QWheelEvent *e)
 {
+    QQuickItem *object = this->rootObject();                          //From QML
+    QObject *text = object->findChild<QObject*>("text2");
+    qDebug() << "Property value:" << QQmlProperty::read(text, "text").toString();
     qDebug()<<"Test FOV: "<<m_scene->getFOV();
-    if(m_scene->getFOV()>=30 && m_scene->getFOV()<=170)
+    if(m_scene->getFOV()>=20 && m_scene->getFOV()<=160)
     {
         m_scene->setFOV(m_scene->getFOV()+(e->delta()/40));
-        if(m_scene->getFOV()>170)
+        if(m_scene->getFOV()>160)
         {
-            m_scene->setFOV(170);
+            m_scene->setFOV(160);
         }
-        if(m_scene->getFOV()<30)
+        if(m_scene->getFOV()<20)
         {
-            m_scene->setFOV(30);
+            m_scene->setFOV(20);
         }
     }
 }
