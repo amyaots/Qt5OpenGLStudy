@@ -1,10 +1,12 @@
-import QtQuick 2.1
+import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Controls.Styles 1.1
 import QtQuick.XmlListModel 2.0
+import QtQuick.Controls.Private 1.0
 
 Item {
 id: root
+    ListModel {id: list}
     Text {
         objectName: "text1"
         id: text1
@@ -29,11 +31,65 @@ id: root
         XmlRole { name: "metalx"; query: "metal/number()" }
         XmlRole { name: "xrayx"; query: "xray/number()" }
     }
+    XmlListModel {
+        id: reactionsModel
+        source: "reactions.xml"
+        query: "/reactions/formula"
+        XmlRole { name: "names"; query: "text/string()" }
+        onStatusChanged: {
+                    if (status == XmlListModel.Ready) {
+                        for (var i = 0; i < count; ++i) {
+                            var item = get(i)
+                            if(item.names !== "0")
+                                list.append({textl: item.names})
+                        }
+                    }
+        }
+    }
+    ComboBox {
+        objectName: "combo1"
+        id:combo
+        anchors.horizontalCenter: parent.horizontalCenter;
+        anchors.bottom: text1.top
+        anchors.bottomMargin: 50
+        model: list
+        //width: 300
+        style: ComboBoxStyle{
+            background: Rectangle {
+                 implicitWidth: 400
+                 implicitHeight: 30
+                 color: "#00886d"
+                 border.width: 1
+                 border.color: Qt.lighter(color)
+                 antialiasing: true
+                 opacity: 0.85
+                 Rectangle {
+                   id: glyph
+                   width: 10
+                   height: 10
+                   anchors.verticalCenter: parent.verticalCenter
+                   anchors.right: parent.right
+                   anchors.rightMargin: 10
+                   color: !control.enabled ? "#DADAD9" : control.hovered ? "#1D5086" : "#5791CD"
+                 }
+               }
+               label: Label {
+                 verticalAlignment: Qt.AlignVCenter
+                 anchors.left: parent.left
+                 anchors.leftMargin: 5
+                 text: control.currentText
+                 color: !control.enabled ? "#DADAD9" : "white"
+                 anchors.fill: parent
+                 font.pixelSize: 18
+               }
+             }
+    }
     Text {
+        objectName: "text2"
         id: testtext
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        text: elementsModel.count
+        text: combo.currentText
         color: "white"
     }
 
