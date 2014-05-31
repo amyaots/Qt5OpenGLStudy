@@ -2,8 +2,6 @@
 //#include "window.h"                 //basic window with OpenGL context 4.3 Core profile
 #include <QApplication>
 #include <QQmlContext>
-#include <QQmlProperty>
-#include <QQuickItem>
 
 
 int main(int argc, char* argv[])
@@ -20,8 +18,8 @@ int main(int argc, char* argv[])
     window->setSource(QUrl("qrc:///qml/main.qml"));
     window->show();
 
-    QQuickItem *object = window->rootObject();                          //From QML
-    QObject *text = object->findChild<QObject*>("text1");
-    qDebug() << "Property value:" << QQmlProperty::read(text, "text").toString();
+    //QQuickItem *object = window->rootObject();                          //From QML
+    //QObject *text = object->findChild<QObject*>("text2");
+    //qDebug() << "Property value:" << QQmlProperty::read(text, "text").toString();
     return app.exec();
 }
