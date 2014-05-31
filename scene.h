@@ -32,9 +32,11 @@ private:
     QOpenGLShaderProgram        m_shaderProgram;
     QOpenGLBuffer               m_vertexBuffer;
     QOpenGLBuffer               m_indexBuffer;
+    QOpenGLBuffer               m_normalBuffer;
     //GLuint                      m_vbo;
     QVector<unsigned int> el;
     QVector<float> v;
+    QVector<float> n;         // Normals
     int indexCount() const { return 6 * m_slices * m_rings; }
     float m_radius;
     int m_rings;  // Rings of latitude

@@ -4,16 +4,17 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-const float pi = M_PI;
-const float twoPi = 2.0 * pi;
+const double pi = M_PI;
+const double twoPi = 2.0 * pi;
 
 Scene::Scene(QObject* parent)
     : AbstractScene(parent),
       m_shaderProgram(),
       m_vertexBuffer(QOpenGLBuffer::VertexBuffer),
+      m_normalBuffer(QOpenGLBuffer::VertexBuffer),
       m_indexBuffer(QOpenGLBuffer::IndexBuffer),
       m_frame(0),
-      m_radius(0.2),
+      m_radius(0.2f),
       m_rings(30),
       m_slices(30)
 {
@@ -26,12 +27,12 @@ void Scene::genSphere()
     int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
     QVector<float>& vertices = v;
     QVector<unsigned int>& indices = el;
+    QVector<float>& normals = n;
     vertices.resize( 3 * nVerts );
     indices.resize( 6 * faces );
+    normals.resize( 3 * nVerts );
     const float dTheta = twoPi / static_cast<float>( m_slices );
     const float dPhi = pi / static_cast<float>( m_rings );
-    const float du = 1.0f / static_cast<float>( m_slices );
-    const float dv = 1.0f / static_cast<float>( m_rings );
 
     // Iterate over latitudes (rings)
     int index = 0;
@@ -40,7 +41,6 @@ void Scene::genSphere()
         const float phi = pi / 2.0f - static_cast<float>( lat ) * dPhi;
         const float cosPhi = cosf( phi );
         const float sinPhi = sinf( phi );
-        const float v = 1.0f - static_cast<float>( lat ) * dv;
 
         // Iterate over longitudes (slices)
         for ( int lon = 0; lon < m_slices + 1; ++lon )
@@ -53,6 +53,11 @@ void Scene::genSphere()
             vertices[index]   = m_radius * cosTheta * cosPhi;
             vertices[index+1] = m_radius * sinPhi;
             vertices[index+2] = m_radius * sinTheta * cosPhi;
+
+            normals[index]   = cosTheta * cosPhi;
+            normals[index+1] = sinPhi;
+            normals[index+2] = sinTheta * cosPhi;
+
             index += 3;
         }
     }
@@ -126,6 +131,7 @@ void Scene::initialise()
     prepareVertexArrayObject();
     glClearColor(0.2f, 0.0f, 0.5f, 1.0f);
     glEnable( GL_DEPTH_TEST | GL_CULL_FACE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void Scene::update(float t)
@@ -139,24 +145,29 @@ void Scene::render(float w, float h)
     QOpenGLVertexArrayObject::Binder binder( &m_vao );
     // Clear the buffer with the current clearing color
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     m_shaderProgram.bind();
-    QMatrix4x4 matrix;
-    matrix.perspective(getFOV(), w/h, 0.1f, 100.f);
-    //matrix.frustum(-0.5f, 0.5f, -0.5f, 0.5f, 0.1f, 100.f);
-    matrix.lookAt(QVector3D(0.f,0.f,2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
-    //matrix.rotate(100.0f * m_frame/80, 1, 1, 0);
+    QMatrix4x4 matrix; QMatrix4x4 view; QMatrix4x4 proj;
+    matrix.setToIdentity();
+    proj.perspective(getFOV(), w/h, 0.1f, 100.f);
+    view.lookAt(QVector3D(0.f,0.f,2.f),QVector3D(0.f,0.f,0.f),QVector3D(0.f,1.f,0.f));
+    m_shaderProgram.setUniformValue("proj", proj);
+    m_shaderProgram.setUniformValue("view", view);
+    QMatrix4x4 modelViewMatrix = view * matrix;
+    QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
+    m_shaderProgram.setUniformValue( "normalMatrix", normalMatrix );
+
     // Draw stuff
     //glDrawArrays( GL_TRIANGLES, 0, 36 );
-    matrix.translate(1.f,0.0f,0.0f);
-    m_shaderProgram.setUniformValue("matrix", matrix);
+    matrix.translate(0.6f,0.0f,0.0f);
+    m_shaderProgram.setUniformValue("model", matrix);
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
     matrix.translate(-0.5f,0.0f,0.0f);
-    m_shaderProgram.setUniformValue("matrix", matrix);
+    matrix.rotate(175, 1, 1, 0);
+    m_shaderProgram.setUniformValue("model", matrix);
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
     m_shaderProgram.release();
-    //if(++m_frame==288)
-    //    m_frame = 0;
+    if(++m_frame==288)
+       m_frame = 0;
 }
 
 void Scene::resize(int w, int h)
@@ -188,7 +199,11 @@ void Scene::prepareVertexBuffers()
         return;
     }
     m_vertexBuffer.allocate( v.constData(), v.size() * sizeof( float ) );
-    m_vertexBuffer.release();
+    //m_vertexBuffer.release();
+    m_normalBuffer.create();
+    m_normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    m_normalBuffer.bind();
+    m_normalBuffer.allocate( n.constData(), n.size() * sizeof( float ) );
     m_indexBuffer.create();
     m_indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
     m_indexBuffer.bind();
@@ -213,6 +228,14 @@ void Scene::prepareVertexArrayObject()
     }
     m_shaderProgram.enableAttributeArray("vertex");
     m_shaderProgram.setAttributeBuffer("vertex", GL_FLOAT, 0, 3);
+    m_normalBuffer.bind();
+    m_shaderProgram.enableAttributeArray( "vertexNormal" );
+    m_shaderProgram.setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
+    m_shaderProgram.setUniformValue( "light.position", QVector4D( 0.0f, 0.0f, 0.0f, 0.0f ) );
+    m_shaderProgram.setUniformValue( "light.intensity", QVector3D( 1.0f, 1.0f, 1.0f ) );
+    m_shaderProgram.setUniformValue( "material.ks", QVector3D( 0.95f, 0.95f, 0.95f ) );
+    m_shaderProgram.setUniformValue( "material.ka", QVector3D( 0.1f, 0.1f, 0.1f ) );
+    m_shaderProgram.setUniformValue( "material.shininess", 100.0f );
     m_shaderProgram.release();
     m_vertexBuffer.release();
     m_indexBuffer.bind();
